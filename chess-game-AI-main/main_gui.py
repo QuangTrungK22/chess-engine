@@ -69,6 +69,11 @@ def main():
         text='Human Human',
         manager=manager
     )
+    ava_button = pygame_gui.elements.UIButton(
+    relative_rect=p.Rect((WIDTH + PADDING, PADDING*6 + BUTTON_HEIGHT*5), (BUTTON_WIDTH + 40, BUTTON_HEIGHT)), # Điều chỉnh kích thước nếu cần
+    text='Minimax vs Random',
+    manager=manager
+)
 
     # Initial game state
     gs = GameState()
@@ -150,19 +155,91 @@ def main():
                     player_one = True
                     player_two = True
                     human_turn = get_human_turn()
+                elif event.ui_element == ava_button:
+                    player_one = False
+                    player_two = False
+                    gs = GameState()
+                    valid_moves = gs.get_valid_moves()
+                    move_made = False
+                    animate = False
+                    game_over = False
+                    sq_selected = ()
+                    player_clicks = []
+                    print("Selected Mode: Minimax (White) vs Random (Black)")
+                    human_turn = get_human_turn() 
+                                   
+            
 
         # AI move
         # human_turn = (gs.white_to_move and player_one) or (not gs.white_to_move and player_two)
         # print("human turn: {}".format(human_turn))
 
-        if not game_over and not human_turn:
-            AIMove = algorithm_utils.find_best_move_minimax(gs, valid_moves)
-            if AIMove is None:
-                AIMove = algorithm_utils.find_random_move(valid_moves)
-            gs.make_move(AIMove)
-            move_made = True
-            animate = True
+       # if not game_over and not human_turn:
+     #       AIMove = algorithm_utils.find_best_move_minimax(gs, valid_moves)
+      #      if AIMove is None:
+       #         AIMove = algorithm_utils.find_random_move(valid_moves)
+       #     gs.make_move(AIMove)
+       #     move_made = True
+       #     animate = True
 
+        # Tính toán xem có phải lượt AI không
+        is_ai_turn = (gs.white_to_move and not player_one) or \
+                     (not gs.white_to_move and not player_two)
+
+        if not game_over and is_ai_turn: # Bắt đầu khối lệnh xử lý AI
+            # --- TOÀN BỘ CODE BÊN DƯỚI PHẢI THỤT VÀO 1 CẤP SO VỚI DÒNG IF NÀY ---
+            AIMove = None # Khởi tạo AIMove là None
+
+            # LẤY VALID MOVES NGAY ĐẦU KHỐI LỆNH AI
+            current_valid_moves = gs.get_valid_moves()
+
+            # Kiểm tra xem có nước đi hợp lệ không
+            if not current_valid_moves:
+                print("No valid moves for AI.") # Không còn nước đi hợp lệ
+            else:
+                # Nếu có nước đi hợp lệ, tiếp tục logic chọn AI và tìm nước đi
+                if player_one == False and player_two == False: # Chế độ AvA
+                    if gs.white_to_move: # Lượt của Minimax (Trắng)
+                        print("Thinking: Minimax (White)...")
+                        # SỬA BIẾN: Dùng current_valid_moves
+                        AIMove = algorithm_utils.find_best_move_minimax(gs, current_valid_moves)
+                    else: # Lượt của Random (Đen)
+                        print("Thinking: Random (Black)...")
+                        AIMove = algorithm_utils.find_random_move(current_valid_moves)
+                elif not player_one and gs.white_to_move: # Chế độ PvA, AI là Trắng (Minimax)
+                     print("Thinking: AI Minimax (White)...")
+                     # SỬA BIẾN: Dùng current_valid_moves
+                     AIMove = algorithm_utils.find_best_move_minimax(gs, current_valid_moves)
+                elif not player_two and not gs.white_to_move: # Chế độ PvA, AI là Đen (Minimax)
+                     print("Thinking: AI Minimax (Black)...")
+                     # SỬA BIẾN: Dùng current_valid_moves
+                     AIMove = algorithm_utils.find_best_move_minimax(gs, current_valid_moves)
+
+                # Xử lý nếu Minimax không tìm được nước (dùng Random thay thế)
+                if AIMove is None and ((gs.white_to_move and not player_one) or (not gs.white_to_move and not player_two)):
+                     is_minimax_turn = (player_one == False and player_two == False and gs.white_to_move) or \
+                                       (not player_one and gs.white_to_move) or \
+                                       (not player_two and not gs.white_to_move and player_one==False)
+                     if is_minimax_turn:
+                        print("AI Minimax failed to find a move, choosing random.")
+                        AIMove = algorithm_utils.find_random_move(current_valid_moves)
+
+
+            # Thực hiện nước đi nếu tìm được một nước đi (AIMove khác None)
+            # Khối if/else này cũng phải nằm BÊN TRONG 'if not game_over and is_ai_turn:'
+            if AIMove:
+                gs.make_move(AIMove)
+                move_made = True
+                animate = True
+                print(f"AI moved: {AIMove.get_chess_notation()}")
+            # else: # Có thể bỏ else này nếu không muốn in gì khi AI không đi được
+            #    if current_valid_moves: # Chỉ in lỗi nếu có nước đi mà AI vẫn ko chọn đc
+            #        print("AI failed to select a valid move.")
+
+        # --- KẾT THÚC KHỐI LỆNH XỬ LÝ AI ---
+
+        # end phan code em chinh sua 
+            
         # After move handling
         if move_made:
             if animate:
