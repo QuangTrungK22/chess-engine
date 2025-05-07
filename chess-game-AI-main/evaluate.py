@@ -70,9 +70,7 @@ def evaluate_agents(num_games = 1000, agent_depth_1 = algorithm_utils.MAX_DEPTH)
     print(f"Total Evaluation Time: {end_total_time - start_total_time:.2f} sec")
 
 if __name__ == "__main__":
-  algorithm_utils.MAX_DEPTH = 2 # Giảm độ sâu để test nhanh hơn
-#   print(f"Running evaluation with Minimax depth: {algorithm_utils.MAX_DEPTH}")
-  evaluate_agents(num_games=10, agent_depth_1=1)
+    evaluate_agents(num_games=10, agent_depth_1=3)
         
 
             
