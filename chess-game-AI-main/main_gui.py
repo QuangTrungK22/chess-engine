@@ -375,6 +375,7 @@ def drawEndGameText(screen, text):
     screen.blit(textObject, textLocation.move(2, 2))
 
 def draw_moveslog(screen, gs: GameState):
+    return 
     moves_logRect = p.Rect(WIDTH, 0, MOVE_LOG_PANEL_WIDTH, MOVE_LOG_PANEL_HEIGHT)
     p.draw.rect(screen, p.Color("black"), moves_logRect)
     moves_log = gs.moves_log

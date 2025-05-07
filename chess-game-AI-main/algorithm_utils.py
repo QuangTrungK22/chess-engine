@@ -71,7 +71,7 @@ piecePosScores = {
 
 check_mate = 100000
 stale_mate = 0
-MAX_DEPTH = 4
+MAX_DEPTH = 3
 
 next_move = None
 nodes = 0
@@ -80,7 +80,7 @@ def find_random_move(valid_moves: list) -> Move:
     """Return a random move from the list of valid moves."""
     return random.choice(valid_moves) if valid_moves else None
 
-def find_best_move_minimax(gs: GameState, valid_moves: list) -> Move:
+def find_best_move_minimax(gs: GameState, valid_moves: list, depth = MAX_DEPTH) -> Move:
     """
     Use the minimax algorithm with alpha-beta pruning to find the best move.
     """
@@ -90,7 +90,7 @@ def find_best_move_minimax(gs: GameState, valid_moves: list) -> Move:
     beta = check_mate
     nodes = 0
     start_time = time.time()
-    find_move_minimax(gs, valid_moves, MAX_DEPTH, alpha, beta, gs.white_to_move)
+    find_move_minimax(gs, valid_moves, depth, alpha, beta, gs.white_to_move)
     end_time = time.time()
     elapsed_time = end_time - start_time
     print(f"Elapsed time: {elapsed_time:.2f} sec, nodes: {nodes}")

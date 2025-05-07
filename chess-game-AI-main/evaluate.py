@@ -1,34 +1,34 @@
 import time
 from chess_engine import GameState
 import algorithm_utils
+from tqdm import tqdm
 
-def evaluate_agents(num_games = 1000):
+def evaluate_agents(num_games = 1000, agent_depth_1 = algorithm_utils.MAX_DEPTH):
     minimax_wins = 0
     random_wins = 0
     draws = 0
     start_total_time = time.time()
 
-    for i in range(num_games):
+    for i in tqdm(range(num_games)):
         gs = GameState()
         game_start_time = time.time()
-        print(f"Starting game {i + 1} of {num_games}...")
+        # print(f"Starting game {i + 1} of {num_games}...")
 
         #luan phien doi mau cho moi agent
         minimax_is_white = i % 2 == 0
 
-        while not gs.check_mate and not gs.state_mate:
+        while not (gs.check_mate or gs.stale_mate):
             valid_moves = gs.get_valid_moves()
             if not valid_moves:
                 break
             move = None
             if (gs.white_to_move  and minimax_is_white) or (not gs.white_to_move and not minimax_is_white):
-                move = algorithm_utils.minimax(gs, valid_moves)
+                move = algorithm_utils.find_best_move_minimax(gs, valid_moves, depth=agent_depth_1)
             else:
-                move = algorithm_utils.random_move(valid_moves)
-            
+                move = algorithm_utils.find_random_move(valid_moves)
             if move is None:
-                 print(f"Warning: Agent could not find move in game {i+1}. State: Checkmate={gs.check_mate}, Stalemate={gs.stale_mate}")
-            break
+                print(f"Warning: Agent could not find move in game {i+1}. State: Checkmate={gs.check_mate}, Stalemate={gs.stale_mate}")
+                break
 
             gs.make_move(move)
  # Ghi nhận kết quả
@@ -59,7 +59,7 @@ def evaluate_agents(num_games = 1000):
 
 
         game_end_time = time.time()
-        print(f"Game {i+1} finished. Winner: {winner}. Duration: {game_end_time - game_start_time:.2f} sec")
+        # print(f"Game {i+1} finished. Winner: {winner}. Duration: {game_end_time - game_start_time:.2f} sec")
 
     end_total_time = time.time()
     print("\n--- Evaluation Results ---")
@@ -71,8 +71,8 @@ def evaluate_agents(num_games = 1000):
 
 if __name__ == "__main__":
   algorithm_utils.MAX_DEPTH = 2 # Giảm độ sâu để test nhanh hơn
-  print(f"Running evaluation with Minimax depth: {algorithm_utils.MAX_DEPTH}")
-  evaluate_agents(num_games=10)
+#   print(f"Running evaluation with Minimax depth: {algorithm_utils.MAX_DEPTH}")
+  evaluate_agents(num_games=10, agent_depth_1=1)
         
 
             
