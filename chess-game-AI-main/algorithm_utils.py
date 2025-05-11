@@ -84,11 +84,16 @@ def find_best_move_minimax(gs: GameState, valid_moves: list, depth = MAX_DEPTH) 
     """
     Use the minimax algorithm with alpha-beta pruning to find the best move.
     """
+    global MAX_DEPTH
+    if depth != MAX_DEPTH: 
+        MAX_DEPTH = depth
+
     global next_move, nodes
     next_move = None
+    nodes = 0
     alpha = -check_mate
     beta = check_mate
-    nodes = 0
+    
     start_time = time.time()
     find_move_minimax(gs, valid_moves, depth, alpha, beta, gs.white_to_move)
     end_time = time.time()
