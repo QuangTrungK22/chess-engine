@@ -4,7 +4,7 @@ import chess_engine
 from chess_engine import Move, GameState
 import algorithm_utils
 import os
-from GUI import ChessGameGUI 
+# from GUI import ChessGameGUI 
 
 WIDTH = HEIGHT = 512
 MOVE_LOG_PANEL_WIDTH = 290

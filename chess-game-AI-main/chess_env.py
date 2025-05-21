@@ -36,6 +36,25 @@ class ChessEnv:
                 state.extend(one_hot)
         # Append turn indicator: 1 for white's turn, 0 for black's turn
         state.append(1 if self.game.white_to_move else 0)
+
+        """
+        In ra bàn cờ để kiểm tra xem quá trình mô phỏng có kẹt ở đâu không?\
+        
+        - uncomment de xem
+        """
+        # board = []
+        # for row in self.game.board:
+        #     row_squares = []
+        #     for square in row:
+        #         row_squares.append(square)
+        #     board.append(row_squares)
+        
+        # # In bàn cờ dưới dạng lưới 8x8
+        # print("\nChess Board:")
+        # for i, row in enumerate(board):
+        #     print(f"{' '.join(f'{square:>2}' for square in row)} ")
+        # print(f"Turn: {'White' if self.game.white_to_move else 'Black'}\n")
+
         return np.array(state, dtype=np.float32)
     
     def move_to_action_index(self, move: Move) -> int:
@@ -79,7 +98,7 @@ class ChessEnv:
         
         # Compute the board evaluation score after the move
         new_score = algorithm_utils.score_board(self.game)
-        
+
         # Since the turn flips after a move, determine which side just moved:
         # If game.white_to_move is now True, then Black just moved; if False, then White just moved.
         if not self.game.white_to_move:
@@ -89,12 +108,37 @@ class ChessEnv:
             # Black just moved; reward is the improvement for Black (old - new)
             reward = old_score - new_score
         
+        """
+        # khi mô phỏng lại để huấn luyện mô hình thì có 2 trường hợp xảy ra
+        # 1. Trường hợp 1: Không có nước đi nào hợp lệ
+        #
+        # 2. Trường hợp 2: Có nước đi hợp lệ nhưng chỉ còn 2 quân cờ (Vua và Vua) 
+        -> Tại sao self.game.stale_mate lại không hiệu quả?
+
+        """
+        valid_moves = self.game.get_valid_moves()
+        def is_there_any_chess_piece_not_king():
+            for row in self.game.board:
+                for square in row:
+                    if square[1] != "K" and square != "--":
+                        # print(f"Found a piece: {square}")                
+                        return True   
+            return False
+        
+        """
+        Có vẻ như self.game.check_mate không hoạt động như mong đợi
+        tui nghĩ nên để nó tách làm 2 điều kiện riêng biệt và bổ sung điều kiện hòa cờ khi còn 2 con vua
+        """
         # Check terminal conditions (if game is over, optionally add terminal bonus)
         if self.game.check_mate:
+            print("Checkmate!")
             # Add a terminal bonus: +1 for win (from the perspective of the mover), -1 for loss
-            reward += 1 if not self.game.white_to_move else -1
+            reward += 50 if not self.game.white_to_move else +20
             done = True
-        elif self.game.stale_mate:
+
+        elif self.game.stale_mate or not is_there_any_chess_piece_not_king():
+            print("Stalemate!")
+            reward -= 1000
             done = True
         else:
             done = False

@@ -5,6 +5,12 @@ import pygame_gui
 import chess_engine
 from chess_engine import Move, GameState
 import algorithm_utils
+
+#========================
+from agent import DQNAgent
+import torch
+#=======================
+
 # from main import animateMove, highlight_move,draw_moveslog
 # Constants
 WIDTH = HEIGHT = 512
@@ -86,9 +92,18 @@ def main():
     player_two = True
     sq_selected = ()
     player_clicks = []
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f'Using device: {device}')
+    agent = DQNAgent(device=device, loading=True)
+    # agent.load_model("/home/lapquang/code/Agent/chess-engine/chess-game-AI-main/chess_dqn_model.pth")  # Load the trained model
+
+
     def get_human_turn() -> bool:
         return (gs.white_to_move and player_one) or (not gs.white_to_move and player_two)
-    print("all valid moves:{} {}".format(len(valid_moves),valid_moves))
+    
+
+    # print("all valid moves:{} {}".format(len(valid_moves),valid_moves))
     running = True
     while running:
         human_turn = get_human_turn()
@@ -202,9 +217,12 @@ def main():
                     if gs.white_to_move: # Lượt của Minimax (Trắng)
                         print("Thinking: Minimax (White)...")
                         # SỬA BIẾN: Dùng current_valid_moves
-                        AIMove = algorithm_utils.find_best_move_minimax(gs, current_valid_moves)
+                        # AIMove = algorithm_utils.find_best_move_minimax(gs, current_valid_moves)
+                        AIMove = agent.inference(gs, current_valid_moves)
                     else: # Lượt của Random (Đen)
                         print("Thinking: Random (Black)...")
+                        # AIMove = agent.inference(gs, current_valid_moves)
+                        # AIMove = algorithm_utils.find_best_move_minimax(gs, current_valid_moves)
                         AIMove = algorithm_utils.find_random_move(current_valid_moves)
                 elif not player_one and gs.white_to_move: # Chế độ PvA, AI là Trắng (Minimax)
                      print("Thinking: AI Minimax (White)...")
@@ -375,6 +393,7 @@ def drawEndGameText(screen, text):
     screen.blit(textObject, textLocation.move(2, 2))
 
 def draw_moveslog(screen, gs: GameState):
+    return 
     moves_logRect = p.Rect(WIDTH, 0, MOVE_LOG_PANEL_WIDTH, MOVE_LOG_PANEL_HEIGHT)
     p.draw.rect(screen, p.Color("black"), moves_logRect)
     moves_log = gs.moves_log
